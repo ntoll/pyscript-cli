@@ -1,9 +1,10 @@
-import datetime
 from pathlib import Path
 from typing import Optional
+from uuid import uuid4
 
 import jinja2
 import toml
+import datetime
 
 _env = jinja2.Environment(loader=jinja2.PackageLoader("pyscript"))
 
@@ -39,6 +40,7 @@ def new_project(
     version = f"{datetime.date.today().year}.1.1"
     created_on = datetime.datetime.now()
     context = {k: v for k, v in locals().items() if not k.startswith("__")}
+    context["id"] = str(uuid4())
     app_dir = Path(".") / app_name
     app_dir.mkdir()
     manifest_file = app_dir / "manifest.toml"

@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 from pyscript._generator import file_to_html, new_project, string_to_html
+from pyscript import api
 
 try:
     import rich_click.typer as typer
@@ -113,7 +114,7 @@ def wrap(
 
 @app.command()
 def new(
-    app_name: str,
+    app_name: str = typer.Argument(..., help="The name of your new app."),
     app_description: str = typer.Option(..., prompt=True),
     author_name: str = typer.Option(..., prompt=True),
     author_email: str = typer.Option(..., prompt=True),
@@ -127,4 +128,51 @@ def new(
     try:
         new_project(app_name, app_description, author_name, author_email)
     except FileExistsError:
-        raise Abort(f"A directory called {app_name} already exists in this location.")
+        raise Abort(
+          f"A directory called {app_name} already exists in this location."
+        )
+
+
+@app.command()
+def login(username: str = typer.Argument(..., help="Your pyscript.com username.")):
+    """
+    Login to the pyscript.com website.
+    """
+    # TODO: to be determined.
+    api.login(username)
+
+
+@app.command()
+def list():
+    """
+    List all the projects associated with your user.
+    """
+    api.list_projects()
+
+
+@app.command()
+def register():
+    """
+    Register the current project at pyscript.com.
+    """
+    api.register_project()
+
+
+@app.command()
+def push():
+    """
+    Push the current project to pyscript.com.
+    """
+    api.push_project()
+
+
+@app.command()
+def delete(project_id: Optional[str] = typer.Argument(None)):
+    """
+    Delete the current project on pyscript.com.
+    """
+    typer.confirm("Are you sure you want to delete this project?", abort=True)
+    if project_id:
+        api.delete_project_by_id(project_id)
+    else:
+        api.delete_project()
