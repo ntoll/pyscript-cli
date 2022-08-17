@@ -134,12 +134,19 @@ def new(
 
 
 @app.command()
-def login(username: str = typer.Argument(..., help="Your pyscript.com username.")):
+def login(
+    username: str = typer.Option(..., "--username", "-u",
+        help="Your pyscript.com username."),
+    password: str = typer.Option(..., "--password", "-p", prompt=True,
+        hide_input=True, help="Your password for pyscript.com."),
+    hostname: str = typer.Option("https://pyscript.com/", "--hostname", "-h",
+        help="Optional hostname for API instance."
+    ),
+):
     """
     Login to the pyscript.com website.
     """
-    # TODO: to be determined.
-    api.login(username)
+    api.login(username, password, hostname)
 
 
 @app.command()

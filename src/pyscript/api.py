@@ -3,6 +3,7 @@ import typer
 import toml
 from pathlib import Path
 from rich import print
+from pyscript import nuauth
 
 
 API_DOMAIN = "https://pyscript.com"
@@ -63,14 +64,18 @@ def call(method, path, payload=None):
         )
 
 
-@requires_manifest
-def login(username):
+def login(username, password, hostname):
     """
     Go through the process of logging the user into the pyscript.com website
     so future calls to the command line can use their token, etc...
     """
-    # TODO: details to be determined.
-    pass
+    try:
+        nuauth.login(username, password, hostname)
+        ok()
+    except nuauth.AuthError:
+        error(
+            "Could not log you in."
+        )
 
 
 def list_projects():
