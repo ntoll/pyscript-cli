@@ -2,11 +2,8 @@ import requests
 import typer
 import toml
 from pathlib import Path
-from rich import print
 from pyscript import nuauth
-
-
-API_DOMAIN = "https://pyscript.com"
+from rich import print
 
 
 def error(message):
@@ -49,12 +46,21 @@ def call(method, path, payload=None):
 
     Will always exit with a helpful error message if anything goes wrong (a non
     2xx response status).
+
+    The payload is a Python object that's JSON serializable.
     """
-    # TODO: flesh this out when we have an API to hit.
-    # TODO: pass in pydantic model to use for a successful response.
+    method = method.lower()
+    token = nuauth.get_token()
+    domain = nuauth.get_host()
+    headers = {
+        "Authorization": f"Bearer {token}",
+    }
     # Currently the smallest requests based call possible.
-    url = f"{API_DOMAIN}{path}"
-    response = getattr(requests, method.lower())(url, data=payload)
+    url = f"{domain}{path}"
+    if method in ("post", "put"):
+        response = getattr(requests, method)(url, json=payload, headers=headers)
+    else:
+        response = getattr(requests, method)(url, headers=headers)
     if 200 <= response.status_code < 300:
         return response
     else:
@@ -122,4 +128,13 @@ def delete_project_by_id(project_id):
     Given a project id, delete it from pyscript.com.
     """
     call("delete", f"/projects/{project_id}")
+    ok()
+
+
+def host(hostname):
+    """
+    Set the default API hostname to the referenced instance.
+    """
+    nuauth.set_host(hostname)
+    print(f"[bold]API points to:[/bold] {hostname}")
     ok()

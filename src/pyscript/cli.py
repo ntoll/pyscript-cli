@@ -128,23 +128,31 @@ def new(
     try:
         new_project(app_name, app_description, author_name, author_email)
     except FileExistsError:
-        raise Abort(
-          f"A directory called {app_name} already exists in this location."
-        )
+        raise Abort(f"A directory called {app_name} already exists in this location.")
 
 
 @app.command()
 def login(
-    username: str = typer.Option(..., "--username", "-u",
-        help="Your pyscript.com username."),
-    password: str = typer.Option(..., "--password", "-p", prompt=True,
-        hide_input=True, help="Your password for pyscript.com."),
-    hostname: str = typer.Option("https://pyscript.com/", "--hostname", "-h",
-        help="Optional hostname for API instance."
+    username: str = typer.Option(
+        ..., "--username", "-u", help="Your pyscript.com username."
+    ),
+    password: str = typer.Option(
+        ...,
+        "--password",
+        "-p",
+        prompt=True,
+        hide_input=True,
+        help="Your password for pyscript.com.",
+    ),
+    hostname: str = typer.Option(
+        "https://pyscript.com/",
+        "--hostname",
+        "-h",
+        help="Optional hostname for API instance.",
     ),
 ):
     """
-    Login to the pyscript.com website.
+    Login to the API with the given credentials.
     """
     api.login(username, password, hostname)
 
@@ -160,7 +168,7 @@ def list():
 @app.command()
 def register():
     """
-    Register the current project at pyscript.com.
+    Register the current project.
     """
     api.register_project()
 
@@ -168,7 +176,7 @@ def register():
 @app.command()
 def push():
     """
-    Push the current project to pyscript.com.
+    Push the current project.
     """
     api.push_project()
 
@@ -176,10 +184,21 @@ def push():
 @app.command()
 def delete(project_id: Optional[str] = typer.Argument(None)):
     """
-    Delete the current project on pyscript.com.
+    Delete the current project.
     """
     typer.confirm("Are you sure you want to delete this project?", abort=True)
     if project_id:
         api.delete_project_by_id(project_id)
     else:
         api.delete_project()
+
+
+@app.command()
+def host(
+    hostname: str = typer.Argument("https://pyscript.com",
+        help="The API instance. E.g. https://pyscript.com"),
+):
+    """
+    Change the API instance to the given hostname.
+    """
+    api.host(hostname)
