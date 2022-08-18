@@ -19,6 +19,7 @@ def requires_manifest(func):
     Decorator to ensure the command is run in a directory containing a
     project's manifest.toml file.
     """
+
     def inner(*args, **kwargs):
         manifest = Path("manifest.toml")
         if not manifest.is_file():
@@ -30,6 +31,7 @@ def requires_manifest(func):
         with manifest.open("r") as f:
             metadata = toml.load(f)
         return func(metadata, *args, **kwargs)
+
     return inner
 
 
@@ -65,28 +67,36 @@ def call(method, path, payload=None):
         return response
     else:
         error(
-            "There was a problem connecting to pyscript.com:\n\n" +
-            f"{response.status_code} {response.reason}"
+            f"There was a problem connecting to {domain}:\n\n"
+            + f"{response.status_code} {response.reason}"
         )
 
 
 def login(username, password, hostname):
     """
-    Go through the process of logging the user into the pyscript.com website
+    Go through the process of logging the user into the API host
     so future calls to the command line can use their token, etc...
     """
+    if not hostname:
+        hostname = nuauth.get_host()
     try:
         nuauth.login(username, password, hostname)
         ok()
     except nuauth.AuthError:
-        error(
-            "Could not log you in."
-        )
+        error("Could not log you in.")
+
+
+def logout():
+    """
+    Clear the user's token.
+    """
+    nuauth.logout(nuauth.get_host())
+    ok()
 
 
 def list_projects():
     """
-    List the current user's projects on pyscript.com.
+    List the current user's projects.
     """
     response = call("get", "/projects")
     for project in response.json():
@@ -97,12 +107,16 @@ def list_projects():
 @requires_manifest
 def register_project(metadata):
     """
-    Register a project on pyscript.com.
+    Register a project with the API.
     """
-    response = call("post", "/projects", payload={
-        "name": metadata["app_name"],
-        "description": metadata["app_description"]
-    })
+    response = call(
+        "post",
+        "/projects",
+        payload={
+            "name": metadata["app_name"],
+            "description": metadata["app_description"],
+        },
+    )
     ok()
 
 
@@ -125,16 +139,19 @@ def delete_project(metadata):
 
 def delete_project_by_id(project_id):
     """
-    Given a project id, delete it from pyscript.com.
+    Given a project id, delete it.
     """
     call("delete", f"/projects/{project_id}")
     ok()
 
 
-def host(hostname):
+def host(hostname=None):
     """
-    Set the default API hostname to the referenced instance.
+    Set or return the default API hostname to the referenced instance.
     """
-    nuauth.set_host(hostname)
+    if hostname:
+        nuauth.set_host(hostname)
+    else:
+        hostname = nuauth.get_host()
     print(f"[bold]API points to:[/bold] {hostname}")
     ok()

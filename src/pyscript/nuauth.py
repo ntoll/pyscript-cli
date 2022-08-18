@@ -9,6 +9,7 @@ Based upon code found in the conda-cli repos.
 """
 import keyring
 import requests
+from pyscript import DEFAULT_PYSCRIPT_API_HOST
 
 
 __all__ = [
@@ -21,7 +22,7 @@ __all__ = [
 ]
 
 
-KEYRING_APP_NAME = "pyscript.com"
+KEYRING_APP_NAME = "pyscript_cli"
 
 
 class AuthError(Exception):
@@ -34,7 +35,7 @@ class AuthError(Exception):
 
 def login(username: str, password: str, hostname: str) -> str:
     """
-    Go through the process of logging the user into the pyscript.com website
+    Go through the process of logging the user into the API host
     so future calls to the command line can use their token, etc...
     """
     token = _get_token_from_api(username, password, hostname)
@@ -65,7 +66,8 @@ def get_host() -> str:
     """
     hostname = keyring.get_password(KEYRING_APP_NAME, "host")
     if not hostname:
-        hostname = "https://pyscript.com"
+        hostname = DEFAULT_PYSCRIPT_API_HOST
+    return hostname
 
 
 def set_host(hostname: str) -> None:
@@ -98,6 +100,3 @@ def _store_token(hostname, token):
     Safely store the API token for the given hostname.
     """
     keyring.set_password(KEYRING_APP_NAME, hostname, token)
-
-
-def _get_default_hostname():

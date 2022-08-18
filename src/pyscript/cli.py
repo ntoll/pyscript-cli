@@ -14,7 +14,7 @@ except ImportError:  # pragma: no cover
 
 from rich.console import Console
 
-from pyscript import __version__
+from pyscript import __version__, DEFAULT_PYSCRIPT_API_HOST
 
 console = Console()
 app = typer.Typer(add_completion=False)
@@ -134,7 +134,7 @@ def new(
 @app.command()
 def login(
     username: str = typer.Option(
-        ..., "--username", "-u", help="Your pyscript.com username."
+        ..., "--username", "-u", help="Your username for the API."
     ),
     password: str = typer.Option(
         ...,
@@ -142,10 +142,10 @@ def login(
         "-p",
         prompt=True,
         hide_input=True,
-        help="Your password for pyscript.com.",
+        help="Your password for the API.",
     ),
     hostname: str = typer.Option(
-        "https://pyscript.com/",
+        "",
         "--hostname",
         "-h",
         help="Optional hostname for API instance.",
@@ -155,6 +155,14 @@ def login(
     Login to the API with the given credentials.
     """
     api.login(username, password, hostname)
+
+
+@app.command()
+def logout():
+    """
+    Clear the token for the current API instance.
+    """
+    api.logout()
 
 
 @app.command()
@@ -195,10 +203,11 @@ def delete(project_id: Optional[str] = typer.Argument(None)):
 
 @app.command()
 def host(
-    hostname: str = typer.Argument("https://pyscript.com",
-        help="The API instance. E.g. https://pyscript.com"),
+    hostname: str = typer.Argument(
+        "", help="The API instance. E.g. https://pyscript.com"
+    ),
 ):
     """
-    Change the API instance to the given hostname.
+    Set or display the API instance.
     """
     api.host(hostname)

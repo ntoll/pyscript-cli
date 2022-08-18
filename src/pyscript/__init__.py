@@ -9,3 +9,6 @@ try:
     __version__ = metadata.version("pyscript-cli")
 except metadata.PackageNotFoundError:  # pragma: no cover
     __version__ = "unknown"
+
+
+DEFAULT_PYSCRIPT_API_HOST = "https://pyscript.com"
