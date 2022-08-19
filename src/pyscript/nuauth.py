@@ -57,7 +57,7 @@ def get_token(hostname: str) -> str:
     Returns a false-y empty string if no token is set (i.e. the user isn't
     logged in).
     """
-    keyring.get_password(KEYRING_APP_NAME, hostname)
+    return keyring.get_password(KEYRING_APP_NAME, hostname)
 
 
 def get_host() -> str:
@@ -77,25 +77,26 @@ def set_host(hostname: str) -> None:
     keyring.set_password(KEYRING_APP_NAME, "host", hostname)
 
 
-def _get_token_from_api(username, password, hostname):
+def _get_token_from_api(username: str, password: str, hostname: str) -> str:
     """
     Get the JWT token from the API at the specified hostname, for the
     referenced user.
     """
-    url = f"{hostname}/auth/login"
+    url = f"{hostname}/api/iam/token"
     response = requests.post(
         url,
         json={
+            "grant_type": "password",
             "username": username,
             "password": password,
         },
     )
     if response.status_code != 200:
         raise AuthError(f"{response.status_code} {response.content}")
-    return response.json().get("token")
+    return response.json().get("access_token")
 
 
-def _store_token(hostname, token):
+def _store_token(hostname: str, token: str):
     """
     Safely store the API token for the given hostname.
     """

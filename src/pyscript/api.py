@@ -52,8 +52,8 @@ def call(method, path, payload=None):
     The payload is a Python object that's JSON serializable.
     """
     method = method.lower()
-    token = nuauth.get_token()
     domain = nuauth.get_host()
+    token = nuauth.get_token(domain)
     headers = {
         "Authorization": f"Bearer {token}",
     }
